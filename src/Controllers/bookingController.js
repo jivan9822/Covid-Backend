@@ -32,7 +32,7 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
     data[0].details[day - 1].availableSlots.find((el) => el.time === time)
       .quantity != -1
   ) {
-    await data[0].save();
+    await data[0].save({ validateBeforeSave: false });
     return res.status(200).json({
       status: true,
       message: `Vaccination booking success date: ${date} time: ${time}`,
