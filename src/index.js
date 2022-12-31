@@ -2,6 +2,7 @@ require('dotenv').config({ path: 'config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const admin = require('./Routes/adminRoute');
+const book = require('./Routes/bookRoute');
 const AppError = require('./Error/AppError');
 const { globalErrorHandler } = require('./Error/GlobalError');
 const app = express();
@@ -18,6 +19,7 @@ mongoose
   });
 
 app.use('/admin', admin);
+app.use('/book', book);
 
 app.all('*', (req, res, next) => {
   return next(new AppError(`The ${req.originalUrl} not found on server!`, 400));
