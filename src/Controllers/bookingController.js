@@ -18,18 +18,34 @@ exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
 exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
   const vaccine = await Vaccine.find();
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
-  if (flag.qty) {
+  if (flag && flag.qty) {
     req.body.user = req.user._id;
     const booking = await Booking.create(req.body);
-    return res.send(booking);
+    return res.status(201).json({
+      status: true,
+      message: 'booking success!',
+      booking,
+    });
   }
-  res.send('Booking fail');
+  next(new AppError(`Booking not available on this date`, 400));
 });
 
 exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
-  await Booking.findOneAndDelete({ user: req.user._id });
-  req.body.user = req.user._id;
-  const booking = await Booking.create(req.body);
-
-  res.send(booking);
+  const vaccine = await Vaccine.find();
+  const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
+  if (flag && flag.qty) {
+    const booking = await Booking.findByIdAndUpdate(
+      { _id: req.body.bookingId },
+      {
+        $set: { day: req.body.day },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      status: true,
+      message: 'booking update success!',
+      booking,
+    });
+  }
+  next(new AppError(`Booking not available on this date`, 400));
 });

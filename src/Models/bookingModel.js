@@ -33,5 +33,14 @@ bookSchema.post('save', function () {
   this.constructor.updateData();
 });
 
+bookSchema.pre(/^findOne/, async function (next) {
+  this.r = await this.find().clone();
+  next();
+});
+
+bookSchema.post(/^findOne/, function () {
+  this.r[0].constructor.updateData();
+});
+
 const Booking = mongoose.model('Booking', bookSchema);
 module.exports = Booking;
