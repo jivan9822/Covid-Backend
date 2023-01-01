@@ -47,7 +47,6 @@ const userSchema = mongoose.Schema({
   },
   booking: {
     day: String,
-    time: String,
   },
 });
 

@@ -4,6 +4,19 @@ const Booking = require('../Models/bookingModel');
 const User = require('../Models/userModel');
 const Vaccine = require('../Models/VaccineSlotModel');
 
+const getDate = (date) => {
+  return (
+    date
+      .split('-')[0]
+      .split('/')
+      .map((each) => (each.length == 1 ? '0' + each : each))
+      .reverse()
+      .join('-') +
+    'T' +
+    date.split('-')[1]
+  );
+};
+
 exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
   const result = await Vaccine.find();
   if (!result.length) {
@@ -16,6 +29,10 @@ exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
 });
 
 exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
+  const date = new Date(getDate(req.body.day)).getTime();
+  if (new Date().getTime() > date) {
+    return next(new AppError('Date should be greater than today!', 400));
+  }
   const vaccine = await Vaccine.find();
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
   if (flag && flag.qty) {
@@ -31,6 +48,10 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
 });
 
 exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
+  let date = new Date(getDate(req.body.day)).getTime();
+  if (date - new Date().getTime() + 86400 < 0) {
+    return next('You can update slots only before 24 hour!', 400);
+  }
   const vaccine = await Vaccine.find();
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
   if (flag && flag.qty) {
