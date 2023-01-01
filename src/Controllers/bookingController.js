@@ -8,9 +8,11 @@ exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
     return next(new AppError('Vaccine Not available! Please try again!', 404));
   }
   const data = result[0].details.find((el) => el.day === req.body.day);
+  const startDay = result[0].details[0].day;
+  const endDay = result[0].details[result[0].details.length - 1].day;
   if (!data) {
     return next(
-      new AppError(`Please select date between ${result[0].date}`, 400)
+      new AppError(`Please select date between ${startDay} to ${endDay}`, 400)
     );
   }
   res.send(data);
@@ -25,17 +27,15 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
   if (!data.length) {
     return next(new AppError('No slots available!', 404));
   }
-  const date = `${day}${data[0].date.substring(1, 8)}`;
-  data[0].details[day - 1].availableSlots.find((el) => el.time === time)
-    .quantity--;
+  const dayQuery = day.split('-')[2];
   if (
-    data[0].details[day - 1].availableSlots.find((el) => el.time === time)
-      .quantity != -1
+    data[0].details[dayQuery - 1].availableSlots.find((el) => el.time === time)
+      .quantity--
   ) {
     await data[0].save({ validateBeforeSave: false });
     return res.status(200).json({
       status: true,
-      message: `Vaccination booking success date: ${date} time: ${time}`,
+      message: `Vaccination booking success date: ${day} time: ${time}`,
     });
   } else {
     return next('Booking fail slot not available!', 400);

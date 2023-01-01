@@ -11,13 +11,15 @@ const generateToken = (id) => {
 };
 
 exports.authentication = CatchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return next(new AppError(`Please provide your email and password!`, 400));
+  const { mobileNumber, password } = req.body;
+  if (!mobileNumber || !password) {
+    return next(
+      new AppError(`Please provide your mobileNumber and password!`, 400)
+    );
   }
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ mobileNumber }).select('+password');
   if (!user || !(await user.correctPass(password, user.password))) {
-    return next(new AppError(`Invalid email or password!`, 400));
+    return next(new AppError(`Invalid mobileNumber or password!`, 400));
   }
   const token = generateToken(user._id);
   user.password = undefined;
@@ -54,11 +56,11 @@ exports.protect = CatchAsync(async (req, res, next) => {
     );
   }
 
-  if (user.changedPasswordAfter(decode.iat)) {
-    return next(
-      new AppError('User recently changed password! Please log in again.', 401)
-    );
-  }
+  // if (user.changedPasswordAfter(decode.iat)) {
+  //   return next(
+  //     new AppError('User recently changed password! Please log in again.', 401)
+  //   );
+  // }
   req.user = user;
   next();
 });
@@ -75,7 +77,7 @@ exports.restrictTo = (roll) => {
 };
 
 const Obj = {
-  user: ['address', 'fname', 'lname', 'email', 'profileImage', 'phone'],
+  user: ['address', 'fname', 'lname', 'mobileNumber', 'profileImage', 'phone'],
   product: [
     'title',
     'description',

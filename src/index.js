@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const admin = require('./Routes/adminRoute');
 const book = require('./Routes/bookRoute');
+const user = require('./Routes/userRoute');
 const AppError = require('./Error/AppError');
 const { globalErrorHandler } = require('./Error/GlobalError');
 const app = express();
@@ -20,6 +21,7 @@ mongoose
 
 app.use('/admin', admin);
 app.use('/book', book);
+app.use('/user', user);
 
 app.all('*', (req, res, next) => {
   return next(new AppError(`The ${req.originalUrl} not found on server!`, 400));
