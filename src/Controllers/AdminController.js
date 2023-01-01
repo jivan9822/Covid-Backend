@@ -18,37 +18,24 @@ const Obj = [
   { time: '16:00:00', quantity: 10 },
   { time: '16:30:00', quantity: 10 },
 ];
-function getDaysInMonth(month, year) {
-  var date = new Date(year, month, 1);
-  var days = [];
+exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
+  let [year, month, day] = req.body.date.split('-').map(Number);
+  month -= 1;
+  let date = new Date(year, month, day);
+  const vaccine = await Vaccine.create({ date: req.body.date });
+
   while (date.getMonth() === month) {
-    days.push(new Date(date).toLocaleDateString());
+    const dateNew = date.toLocaleDateString();
+    Obj.map((each) => {
+      const time = `${dateNew}-${each.time}`;
+      vaccine.slots.push({ time, qty: 10 });
+    });
     date.setDate(date.getDate() + 1);
   }
-  return days;
-}
-
-exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
-  console.log(req.body.date);
-  if (!req.body.date) {
-    return next(
-      new AppError(`Please enter first day of month ex. 2023-02-01`, 400)
-    );
-  }
-  const date = req.body.date.split('-').map(Number);
-  let count = getDaysInMonth(date[1] - 1, date[0]);
-  // console.log(count);
-  // req.body.date = `${count[0]} to ${count[count.length - 1]}`;
-  const data = await Vaccine.create(req.body);
-  for (let i = 0; i < count.length; ++i) {
-    const date = count[i].split('/').reverse().join('-');
-    const temp = { day: date, availableSlots: Obj };
-    data.details.push(temp);
-  }
-  await data.save();
+  await vaccine.save();
   res.status(201).json({
     status: true,
     message: 'Data added success!',
-    data,
+    // data,
   });
 });
