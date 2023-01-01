@@ -8,15 +8,10 @@ exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
   if (!result.length) {
     return next(new AppError('Vaccine Not available! Please try again!', 404));
   }
-  const data = result[0].details.find((el) => el.day === req.body.day);
-  const startDay = result[0].details[0].day;
-  const endDay = result[0].details[result[0].details.length - 1].day;
-  if (!data) {
-    return next(
-      new AppError(`Please select date between ${startDay} to ${endDay}`, 400)
-    );
-  }
-  res.send(data);
+  const date = result[0].slots.filter((each) => {
+    return each.time.startsWith(req.body.day);
+  });
+  res.send(date);
 });
 
 exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
