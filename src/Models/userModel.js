@@ -45,8 +45,9 @@ const userSchema = mongoose.Schema({
     type: String,
     default: 'user',
   },
-  bookingId: {
-    type: mongoose.Types.ObjectId,
+  booking: {
+    day: String,
+    time: String,
   },
 });
 
