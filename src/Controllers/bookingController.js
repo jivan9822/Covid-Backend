@@ -4,6 +4,8 @@ const Booking = require('../Models/bookingModel');
 const User = require('../Models/userModel');
 const Vaccine = require('../Models/VaccineSlotModel');
 
+let today = new Date().getTime() / 1000;
+
 const getDate = (date) => {
   return (
     date
@@ -29,40 +31,26 @@ exports.getVaccineAvailability = CatchAsync(async (req, res, next) => {
 });
 
 exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
-  const date = new Date(getDate(req.body.day)).getTime();
-  if (new Date().getTime() > date) {
-    return next(new AppError('Date should be greater than today!', 400));
-  }
-  const vaccine = await Vaccine.find();
-  const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
-  if (flag && flag.qty) {
-    req.body.user = req.user._id;
+  const date = new Date(getDate(req.body.day));
 
-    const booking = await Booking.create(req.body);
-    const { dose } = req.body;
-    req.user.bookingId = booking._id;
-    req.user.booking = date;
+  req.body.user = req.user._id;
 
-    dose == 'first'
-      ? (req.user.firstDose = date)
-      : (req.user.secondDose = date);
+  const booking = await Booking.create(req.body);
+  const { dose } = req.body;
+  req.user.bookingId = booking._id;
+  req.user.booking = date;
 
-    await req.user.save();
-    return res.status(201).json({
-      status: true,
-      message: 'booking success!',
-      booking,
-    });
-  }
-  next(new AppError(`Booking not available on this date`, 400));
+  dose == 'first' ? (req.user.firstDose = date) : (req.user.secondDose = date);
+
+  await req.user.save();
+  return res.status(201).json({
+    status: true,
+    message: 'booking success!',
+    booking,
+  });
 });
 
 exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
-  let date = new Date(getDate(req.body.day)).getTime() / 1000;
-  let today = new Date().getTime() / 1000;
-  if (date < today + 86400) {
-    return next('You can update slots only before 24 hour!', 400);
-  }
   const vaccine = await Vaccine.find();
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
   if (flag && flag.qty) {
@@ -73,6 +61,8 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
       },
       { new: true }
     );
+    req.user.booking = new Date(getDate(req.body.day));
+    await req.user.save();
     return res.status(200).json({
       status: true,
       message: 'booking update success!',
@@ -83,20 +73,17 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
 });
 
 exports.cancelVaccinationSlot = CatchAsync(async (req, res, next) => {
-  if (req.user.booking.getTime() > new Date().getTime() + 86400) {
-    const booking = await Booking.findOneAndDelete({ _id: req.user.bookingId });
-    if (booking.dose == 'first') {
-      req.user.firstDose = null;
-    } else {
-      req.user.secondDose = null;
-    }
-    await req.user.save();
-    if (!booking) {
-      return next(new AppError('No booking found!', 400));
-    }
-    return res.status(204).json({
-      status: true,
-    });
+  const booking = await Booking.findOneAndDelete({ _id: req.user.bookingId });
+  if (booking.dose == 'first') {
+    req.user.firstDose = null;
+  } else {
+    req.user.secondDose = null;
   }
-  next(new AppError('Deletion unsuccessful', 400));
+  await req.user.save();
+  if (!booking) {
+    return next(new AppError('No booking found!', 400));
+  }
+  return res.status(204).json({
+    status: true,
+  });
 });

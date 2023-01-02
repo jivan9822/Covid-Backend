@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const AppError = require('../Error/AppError');
 const User = require('../Models/userModel');
 const { promisify } = require('util');
+const Vaccine = require('../Models/VaccineSlotModel');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRETE_STRING, {
@@ -112,3 +113,31 @@ exports.updateOnly = (req, res, next) => {
   }
   next();
 };
+
+exports.isSlotAvailable = CatchAsync(async (req, res, next) => {
+  if (new Date(req.body.day) < new Date()) {
+    return next(
+      new AppError(
+        'Booking date and time should be greater than current time',
+        400
+      )
+    );
+  }
+  const vaccine = await Vaccine.find();
+  const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
+  if (flag && flag.qty) {
+    return next();
+  }
+  next('No slot available to given time!', 404);
+});
+
+exports.isValidUpdateTime = CatchAsync(async (req, res, next) => {
+  const today = new Date(); //?
+  const tomorrow = new Date(today); //?
+  tomorrow.setDate(tomorrow.getDate() + 1); //?
+  let prevDate = req.user.booking;
+  if (prevDate < new Date(tomorrow)) {
+    return next('You can update or cancel only 24 hours prior!', 400);
+  }
+  next();
+});
