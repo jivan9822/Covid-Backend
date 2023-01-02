@@ -84,7 +84,7 @@ exports.isValidDose = CatchAsync(async (req, res, next) => {
     );
   }
   if (dose == 'first' && !req.user.firstDose) {
-    next();
+    return next();
   }
   if (dose == 'second' && !req.user.firstDose) {
     return next(new AppError('Please take first-dose before second!', 400));

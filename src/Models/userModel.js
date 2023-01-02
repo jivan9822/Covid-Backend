@@ -49,6 +49,9 @@ const userSchema = mongoose.Schema({
     type: Date,
     default: null,
   },
+  bookingId: {
+    type: mongoose.Types.ObjectId,
+  },
 });
 
 userSchema.pre('save', async function (next) {

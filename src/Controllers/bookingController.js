@@ -40,7 +40,7 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
 
     const booking = await Booking.create(req.body);
     const { dose } = req.body;
-
+    req.user.bookingId = booking._id;
     req.user.booking = date;
 
     dose == 'first'
@@ -66,7 +66,7 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
   if (flag && flag.qty) {
     const booking = await Booking.findByIdAndUpdate(
-      { _id: req.body.bookingId },
+      req.user.bookingId,
       {
         $set: { day: req.body.day },
       },
@@ -79,4 +79,11 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
     });
   }
   next(new AppError(`Booking not available on this date`, 400));
+});
+
+exports.cancelVaccinationSlot = CatchAsync(async (req, res, next) => {
+  if (req.user.booking.getTime() > new Date().getTime()) {
+    await Booking.findByIdAndDelete(req.user.bookingId);
+    res.send('delete');
+  }
 });
