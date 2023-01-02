@@ -8,7 +8,6 @@ const bookSchema = mongoose.Schema({
   user: {
     type: mongoose.Types.ObjectId,
     ref: 'User',
-    unique: true,
   },
   dose: {
     type: String,

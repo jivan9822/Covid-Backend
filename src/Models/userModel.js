@@ -29,12 +29,12 @@ const userSchema = mongoose.Schema({
     unique: true,
   },
   firstDose: {
-    type: Boolean,
-    default: false,
+    type: Date,
+    default: null,
   },
   secondDose: {
-    type: Boolean,
-    default: false,
+    type: Date,
+    default: null,
   },
   password: {
     type: String,
@@ -46,12 +46,15 @@ const userSchema = mongoose.Schema({
     default: 'user',
   },
   booking: {
-    day: String,
+    type: Date,
+    default: null,
   },
 });
 
 userSchema.pre('save', async function (next) {
-  this.password = await bcrypt.hash(this.password, 12);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
   this.roll = 'user';
   next();
 });

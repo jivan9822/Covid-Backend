@@ -17,3 +17,15 @@ exports.userLogin = CatchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.updateUser = CatchAsync(async (req, res, next) => {
+  for (const i in req.body) {
+    req.user[i] = req.body[i];
+  }
+  await req.user.save({ validateBeforeSave: true });
+  res.send(req.user);
+});
+
+exports.getUser = CatchAsync(async (req, res, next) => {
+  res.send(req.user);
+});

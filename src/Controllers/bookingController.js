@@ -37,7 +37,17 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
   const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
   if (flag && flag.qty) {
     req.body.user = req.user._id;
+
     const booking = await Booking.create(req.body);
+    const { dose } = req.body;
+
+    req.user.booking = date;
+
+    dose == 'first'
+      ? (req.user.firstDose = date)
+      : (req.user.secondDose = date);
+
+    await req.user.save();
     return res.status(201).json({
       status: true,
       message: 'booking success!',

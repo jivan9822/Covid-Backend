@@ -76,29 +76,39 @@ exports.restrictTo = (roll) => {
   };
 };
 
+exports.isValidDose = CatchAsync(async (req, res, next) => {
+  const { dose } = req.body;
+  if (req.user.firstDose && req.user.secondDose) {
+    return next(
+      new AppError('You done all doses! No need to book any slot', 400)
+    );
+  }
+  if (dose == 'first' && !req.user.firstDose) {
+    next();
+  }
+  if (dose == 'second' && !req.user.firstDose) {
+    return next(new AppError('Please take first-dose before second!', 400));
+  }
+  const dateFirst = req.user.booking.getTime();
+  const today = new Date().getTime();
+  if (dose == 'second' && today < dateFirst) {
+    return next(
+      new AppError(
+        'Your first dose is already booked! first complete it and then go for second.',
+        400
+      )
+    );
+  }
+  next();
+});
+
 const Obj = {
-  user: ['address', 'fname', 'lname', 'mobileNumber', 'profileImage', 'phone'],
-  product: [
-    'title',
-    'description',
-    'price',
-    'brand',
-    'currencyId',
-    'currencyFormat',
-    'isFreeShipping',
-    'productImage',
-    'style',
-    'availableSizes',
-  ],
+  user: ['fname', 'lname', 'mobileNumber', 'age', 'pinCode', 'aadharNumber'],
 };
 
-exports.updateOnly = (field) => {
-  return (req, res, next) => {
-    for (const i in req.body) {
-      if (!Obj[field].includes(i)) {
-        delete req.body[i];
-      }
-    }
-    next();
-  };
+exports.updateOnly = (req, res, next) => {
+  for (const i in req.body) {
+    if (!Obj.user.includes(i)) delete req.body[i];
+  }
+  next();
 };
