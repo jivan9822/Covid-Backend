@@ -3,7 +3,7 @@ const Vaccine = require('../Models/VaccineSlotModel');
 const Booking = require('../Models/bookingModel');
 const AppError = require('../Error/AppError');
 const User = require('../Models/userModel');
-const APIFeature = require('../Utils/APIFeature2');
+const APIFeature = require('../Utils/APIFeature');
 
 const Obj = [
   { time: '10:00:00', quantity: 10 },
