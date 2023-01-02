@@ -1,6 +1,9 @@
 const { CatchAsync } = require('../Error/CatchAsync');
 const Vaccine = require('../Models/VaccineSlotModel');
+const Booking = require('../Models/bookingModel');
 const AppError = require('../Error/AppError');
+const User = require('../Models/userModel');
+const APIFeature = require('../Utils/APIFeature2');
 
 const Obj = [
   { time: '10:00:00', quantity: 10 },
@@ -38,5 +41,40 @@ exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
     status: true,
     message: 'Data added success!',
     // data,
+  });
+});
+
+exports.getUserData = CatchAsync(async (req, res, next) => {
+  const features = new APIFeature(User.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .pagination();
+  const users = await features.query;
+  if (!users) {
+    return next(new AppError('No users found!', 404));
+  }
+  res.status(200).json({
+    status: true,
+    result: `${users.length} users found!`,
+    message: 'success',
+    users,
+  });
+});
+exports.getVaccinationData = CatchAsync(async (req, res, next) => {
+  const features = new APIFeature(Booking.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .pagination();
+  const bookings = await features.query;
+  if (!bookings) {
+    return next(new AppError('No bookings found!', 404));
+  }
+  res.status(200).json({
+    status: true,
+    result: `${bookings.length} bookings found!`,
+    message: 'success',
+    bookings,
   });
 });
