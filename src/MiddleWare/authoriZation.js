@@ -124,7 +124,12 @@ exports.isSlotAvailable = CatchAsync(async (req, res, next) => {
     );
   }
   const vaccine = await Vaccine.find();
-  const flag = vaccine[0].slots.find((e) => e.time === req.body.day);
+  if (!vaccine.length) {
+    return next(new AppError('Vaccine Not available! Please try again!', 404));
+  }
+  const flag = vaccine[0].slots.find(
+    (e) => e.time.split('-')[0] === req.body.day.split('-')[0]
+  );
   if (flag && flag.qty) {
     return next();
   }
@@ -137,7 +142,30 @@ exports.isValidUpdateTime = CatchAsync(async (req, res, next) => {
   tomorrow.setDate(tomorrow.getDate() + 1); //?
   let prevDate = req.user.booking;
   if (prevDate < new Date(tomorrow)) {
-    return next('You can update or cancel only 24 hours prior!', 400);
+    return next(
+      new AppError('You can update or cancel only 24 hours prior!', 400)
+    );
+  }
+  next();
+});
+
+const getDate = (date) => {
+  return (
+    date
+      .split('-')[0]
+      .split('/')
+      .map((each) => (each.length == 1 ? '0' + each : each))
+      .reverse()
+      .join('-') +
+    'T' +
+    date.split('-')[1]
+  );
+};
+
+exports.isValidBookTime = CatchAsync(async (req, res, next) => {
+  let prevDate = new Date(getDate(req.body.day));
+  if (prevDate < new Date()) {
+    return next('Book time should be greater than current time!', 400);
   }
   next();
 });

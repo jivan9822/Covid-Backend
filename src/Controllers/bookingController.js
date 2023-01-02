@@ -1,7 +1,6 @@
 const AppError = require('../Error/AppError');
 const { CatchAsync } = require('../Error/CatchAsync');
 const Booking = require('../Models/bookingModel');
-const User = require('../Models/userModel');
 const Vaccine = require('../Models/VaccineSlotModel');
 
 let today = new Date().getTime() / 1000;
@@ -62,6 +61,11 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
       { new: true }
     );
     req.user.booking = new Date(getDate(req.body.day));
+
+    booking.dose == 'first'
+      ? (req.user.firstDose = req.user.booking)
+      : (req.user.secondDose = req.user.booking);
+
     await req.user.save();
     return res.status(200).json({
       status: true,
