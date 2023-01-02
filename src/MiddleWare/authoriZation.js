@@ -83,13 +83,13 @@ exports.isValidDose = CatchAsync(async (req, res, next) => {
       new AppError('You done all doses! No need to book any slot', 400)
     );
   }
-  if (dose == 'first' && !req.user.firstDose) {
-    return next();
+  if (dose == 'first' && req.user.firstDose) {
+    return next(new AppError('No multiple booking allowed!', 400));
   }
   if (dose == 'second' && !req.user.firstDose) {
     return next(new AppError('Please take first-dose before second!', 400));
   }
-  const dateFirst = req.user.booking.getTime();
+  const dateFirst = req.user.booking ? req.user.booking.getTime() : null;
   const today = new Date().getTime();
   if (dose == 'second' && today < dateFirst) {
     return next(

@@ -38,7 +38,9 @@ bookSchema.pre(/^findOne/, async function (next) {
 });
 
 bookSchema.post(/^findOne/, function () {
-  this.r[0].constructor.updateData();
+  if (this.r[0]) {
+    this.r[0].constructor.updateData();
+  }
 });
 
 const Booking = mongoose.model('Booking', bookSchema);

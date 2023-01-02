@@ -58,8 +58,9 @@ exports.bookVaccineSlot = CatchAsync(async (req, res, next) => {
 });
 
 exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
-  let date = new Date(getDate(req.body.day)).getTime();
-  if (date - new Date().getTime() + 86400 < 0) {
+  let date = new Date(getDate(req.body.day)).getTime() / 1000;
+  let today = new Date().getTime() / 1000;
+  if (date < today + 86400) {
     return next('You can update slots only before 24 hour!', 400);
   }
   const vaccine = await Vaccine.find();
@@ -82,8 +83,20 @@ exports.updateVaccineSlot = CatchAsync(async (req, res, next) => {
 });
 
 exports.cancelVaccinationSlot = CatchAsync(async (req, res, next) => {
-  if (req.user.booking.getTime() > new Date().getTime()) {
-    await Booking.findByIdAndDelete(req.user.bookingId);
-    res.send('delete');
+  if (req.user.booking.getTime() > new Date().getTime() + 86400) {
+    const booking = await Booking.findOneAndDelete({ _id: req.user.bookingId });
+    if (booking.dose == 'first') {
+      req.user.firstDose = null;
+    } else {
+      req.user.secondDose = null;
+    }
+    await req.user.save();
+    if (!booking) {
+      return next(new AppError('No booking found!', 400));
+    }
+    return res.status(204).json({
+      status: true,
+    });
   }
+  next(new AppError('Deletion unsuccessful', 400));
 });

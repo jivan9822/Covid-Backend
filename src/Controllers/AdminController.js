@@ -19,6 +19,7 @@ const Obj = [
   { time: '16:30:00', quantity: 10 },
 ];
 exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
+  await Vaccine.deleteMany();
   let [year, month, day] = req.body.date.split('-').map(Number);
   month -= 1;
   let date = new Date(year, month, day);
