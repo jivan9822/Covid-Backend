@@ -5,12 +5,14 @@ const User = require('../Models/userModel');
 const { promisify } = require('util');
 const Vaccine = require('../Models/VaccineSlotModel');
 
+// FUNCTION TO GENERATE JSON-WEB-TOKEN
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRETE_STRING, {
     expiresIn: process.env.JWT_EXPIRATION,
   });
 };
 
+// USER AUTHENTICATION
 exports.authentication = CatchAsync(async (req, res, next) => {
   const { mobileNumber, password } = req.body;
   if (!mobileNumber || !password) {
@@ -29,6 +31,7 @@ exports.authentication = CatchAsync(async (req, res, next) => {
   next();
 });
 
+// AUTHORIZATION OF USER
 exports.protect = CatchAsync(async (req, res, next) => {
   const { authorization } = req.headers;
   let token;
@@ -60,6 +63,7 @@ exports.protect = CatchAsync(async (req, res, next) => {
   next();
 });
 
+// THIS MIDDLEWARE WILL RESTRICT THE ACCESS AS PER ROLL
 exports.restrictTo = (roll) => {
   return (req, res, next) => {
     if (req.user.roll !== roll) {
@@ -71,6 +75,7 @@ exports.restrictTo = (roll) => {
   };
 };
 
+// CHECKING THE DOSE first/second IS VALID OR NOT
 exports.isValidDose = CatchAsync(async (req, res, next) => {
   const { dose } = req.body;
   if (req.user.firstDose && req.user.secondDose) {
@@ -97,6 +102,7 @@ exports.isValidDose = CatchAsync(async (req, res, next) => {
   next();
 });
 
+// THIS WILL RESTRICT THE UPDATING FIELD OF USER
 const Obj = {
   user: ['fname', 'lname', 'mobileNumber', 'age', 'pinCode', 'aadharNumber'],
 };
@@ -108,6 +114,7 @@ exports.updateOnly = (req, res, next) => {
   next();
 };
 
+// CHECKING IF SLOT AVAILABLE OR NOT
 exports.isSlotAvailable = CatchAsync(async (req, res, next) => {
   if (new Date(req.body.day) < new Date()) {
     return next(
@@ -130,6 +137,7 @@ exports.isSlotAvailable = CatchAsync(async (req, res, next) => {
   next('No slot available to given time!', 404);
 });
 
+// IS VALID TIME TO UPDATE
 exports.isValidUpdateTime = CatchAsync(async (req, res, next) => {
   const today = new Date(); //?
   const tomorrow = new Date(today); //?
@@ -143,6 +151,7 @@ exports.isValidUpdateTime = CatchAsync(async (req, res, next) => {
   next();
 });
 
+// TO PARSE STRING TO DATE STRING
 const getDate = (date) => {
   return (
     date
@@ -156,6 +165,7 @@ const getDate = (date) => {
   );
 };
 
+// TO CHECK A VALID BOOKING TIME
 exports.isValidBookTime = CatchAsync(async (req, res, next) => {
   let prevDate = new Date(getDate(req.body.day));
   if (prevDate < new Date()) {

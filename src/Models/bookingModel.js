@@ -15,6 +15,7 @@ const bookSchema = mongoose.Schema({
   },
 });
 
+// THIS IS STATIC METHOD EXECUTE ON EVERY BOOK UPDATE OR DELETE OF BOOKINGS
 bookSchema.statics.updateData = async function () {
   const Obj = {};
   const bookings = await Booking.find();

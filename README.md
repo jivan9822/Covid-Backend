@@ -1,52 +1,91 @@
 ###Backend Developer Assignment
-Tech Stack: NodeJS, MongoDB
-Task Description:
-Develop APIs to access/manage data on MongoDB (should be deployed on Mongodb
-Atlas) for the given use case.
-Use case : Imagine there is an app created for vaccine registration (similar to that of
-Arogyasetu Cowin part).
-App has the functionality to
-(for user)
-● Register user (Mandatory fields: Name, PhoneNumber, Age, Pincode, Aadhar
-No)
-● User can login through his PhoneNumber and password (set during registration)
-● User should be able to see the available time slots on a given day for vaccine
-registration (first/second dose based on his vaccination status)
-● Users can register a slot for the first/second dose of the vaccine (example:
-register for 1st dose on 1st June 11 AM).
-● Users should be able to register for the second dose, only after completing their
-first dose of vaccine. Once the registered time slot is lapsed, the user should be
-considered as vaccinated for that registered dose (first/second).
-● User can update/change his registered slot, till 24 hours prior to his registered
-slot time
-(for admin)
-● Login using admin credentials (There won’t be any api for registering the admin.
-His credentials should be manually created in the database)
-● Check the total users registered and [filter them by Age/Pincode/Vaccination
-status (none/First dose completed/All completed)] - Optional
-● Check the registered slots for the vaccine (first dose /second dose/total) on a
-given day
-Vaccine slot details
-● Assume that vaccination drive is happening only from 1st June ‘21 to 30th June
-‘21
-● Timings of the vaccine : 10 AM to 5 PM everyday
-● Each vaccine slot will be of duration 30 minutes. (So slots will be like 10:00 AM to
-10:30 AM, 10:30 AM to 11:00 AM etc)
-● In each vaccine slot there will be 10 vaccine doses available (vaccine dose is
-same for first/second doses. So both users with first dose or second dose can
-register).
-● So total available vaccine doses => 30*14*10 => 4,200
-● Once 10 vaccine doses in a slot is registered, that time slot shouldn’t be available
-for further registrations (unless the registered user modifies his time slot to a
-different slot)
-Deliverables:
-● Create APIs for all the use cases mentioned above (both user and admin).
-● Create an atlas mongodb free tier instance and use it as the database.
-● Share the APIs private repository (add pvsvamsi as the collaborator), Readme
-file (with apis and their functionality listed, models) and the atlas mongodb
-credentials at the end of the assignment deadline
-Evaluation Criteria:
-● API schema and database models
-● Performance optimizations of the APIs and data validations
-● Use cases covered
-● Explanation/comments for the designed schema and models
+
+## ADMIN ROUTES
+
+# POST /admin/addDose
+
+    You have to pass date of the month from body to add all doses for entire month
+    ex. {"date": "2023-01-01"}
+
+# GET /admin/users
+
+    You can get data of all register users and having all filter, sort, limitFields and pagination also.
+
+# GET /admin/bookings
+
+    You can get data of all vaccination bookings and having all filter, sort, limitFields and pagination also.
+
+## USER ROUTES
+
+# POST /user/register
+
+    Pass fname, lname, mobileNumber, age, pinCode, aadharNumber, password from body to register a user
+    ex.
+    {
+    "fname": "Amit",
+    "lname": "Kumar",
+    "mobileNumber": "7867564525",
+    "age": "42",
+    "pinCode": "400072",
+    "aadharNumber": "1234 1234 1237",
+    "password": "12345password"
+    }
+
+# POST /user/login
+
+    You have to pass mobileNumber and password of user to login from body
+    {
+    "mobileNumber": "9822442282",
+    "password": "12345password"
+    }
+
+# POST /user
+
+    UserProfileUpdate:
+    User can update his profile using user route
+    User can update only following fields from req body
+    {
+    "fname": "Jivan",
+    "lname": "Toshniwal",
+    "mobileNumber": "9822442282",
+    "age": "32",
+    "pinCode": "400072",
+    "aadharNumber": "1234 1234 1234",
+    "password": "12345password"
+    }
+
+# GET /user
+
+    User can get his details using this route
+
+## BOOKING ROUTES
+
+# GET /book/data
+
+    This route is using for get the availability of slot for vaccination. You have to send a day from req body to get the availability details.
+    {
+    "day": "2/1/2023"
+    }
+
+# POST /book/book
+
+    This route is for booking the route.
+    In this route you have to pass day with time and dose first/second to book the particular slot
+    {
+    "day": "3/1/2023-10:00:00",
+    "dose": "first"
+    }
+
+# POST /book/update
+
+    This route is for update booking. You have to pass body as follow to update
+    NOTE: Update only possible before 24 hours of your original booking.
+    {
+    "day": "6/1/2023-16:30:00",
+    "dose": "first"
+    }
+
+# DEL /book/cancel
+
+    This route is to cancel your vaccination booking
+    NOTE: Cancel only possible before 24 hours of your original booking.

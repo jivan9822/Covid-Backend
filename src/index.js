@@ -19,6 +19,7 @@ mongoose
     console.log(error);
   });
 
+// ALL ROUTES
 app.use('/admin', admin);
 app.use('/book', book);
 app.use('/user', user);

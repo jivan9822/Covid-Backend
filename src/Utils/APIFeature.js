@@ -3,6 +3,7 @@ class APIFeature {
     this.query = query;
     this.queryStr = queryStr;
   }
+
   filter() {
     let Obj = { ...this.queryStr };
     ['sort', 'page', 'limit', 'fields'].map((el) => delete Obj[el]);
@@ -20,12 +21,14 @@ class APIFeature {
     this.query = this.query.find(Obj);
     return this;
   }
+
   sort() {
     if (this.queryStr.sort) {
       this.query = this.query.sort(this.queryStr.sort);
     }
     return this;
   }
+
   pagination() {
     if (this.queryStr.page) {
       const page = this.queryStr.page * 1 || 1;
@@ -35,6 +38,7 @@ class APIFeature {
     }
     return this;
   }
+
   limitFields() {
     if (this.queryStr.fields) {
       this.query = this.query.select(this.queryStr.fields.split(',').join(' '));

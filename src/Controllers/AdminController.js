@@ -21,6 +21,8 @@ const Obj = [
   { time: '16:00:00', quantity: 10 },
   { time: '16:30:00', quantity: 10 },
 ];
+
+// ADD VACCINATION DATA FOR WHOLE MONTH
 exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
   await Vaccine.deleteMany();
   let [year, month, day] = req.body.date.split('-').map(Number);
@@ -44,6 +46,7 @@ exports.addVaccineDoses = CatchAsync(async (req, res, next) => {
   });
 });
 
+// GET USER DATA WITH ALL FILTER, SORT, LIMIT-FIELDS AND PAGINATION
 exports.getUserData = CatchAsync(async (req, res, next) => {
   const features = new APIFeature(User.find(), req.query)
     .filter()
@@ -61,6 +64,8 @@ exports.getUserData = CatchAsync(async (req, res, next) => {
     users,
   });
 });
+
+// GET BOOKING DATA WITH FILTER, SORT, LIMIT-FIELDS PAGINATION
 exports.getVaccinationData = CatchAsync(async (req, res, next) => {
   const features = new APIFeature(Booking.find(), req.query)
     .filter()
